@@ -1,0 +1,43 @@
+{
+    "project": "HelloWorld",
+    "target_name": "HelloWorld",
+    "build_dir": "build",
+    "output_dir": "bin",
+
+    "cc": "gcc",
+    "cxx": "g++",
+
+    "flags": [
+        "-Wall",
+        "-Wextra"
+    ],
+
+    "cflags": [
+
+    ],
+
+    "cxxflags": [
+
+    ],
+
+    "include": [
+        "./test/project/"
+    ],
+
+    "defines": [
+
+    ],
+
+    "sources": [
+        "./test/project/main.cpp",
+        "./test/project/func.cpp"
+    ],
+
+    "link": [
+
+    ],
+
+    "libs": [
+
+    ]
+}
