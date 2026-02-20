@@ -12,11 +12,10 @@ pub struct ObjectCollection {
 }
 
 impl ObjectCollection {
-    pub fn to_arg_str(&self) -> String {
-        let mut arg_str = String::new();
+    pub fn to_args(&self) -> Vec<String> {
+        let mut arg_str = Vec::new();
         for obj in &self.objects {
-            arg_str.push_str(utils::normalize_path(obj.path.clone()).to_str().unwrap());
-            arg_str.push(' ');
+            arg_str.push(utils::normalize_path(obj.path.clone()).to_str().unwrap().to_string());
         }
 
         arg_str

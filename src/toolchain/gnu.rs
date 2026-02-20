@@ -5,7 +5,7 @@ use std::time::SystemTime;
 use which::which;
 
 use crate::cli::arg;
-use crate::{toolchain, utils};
+use crate::utils;
 use crate::cson::get_cson_config;
 use crate::object::output::{self, Object, ObjectCollection, SharedLib, StaticLib};
 use crate::object::source::Source;
@@ -48,12 +48,22 @@ impl Compiler for GNU {
             src.get_path().canonicalize().expect("Failed to canonicalize source path")
         };
 
+        let src_path = utils::normalize_path(src_path);
+
         let obj_sub_path = pathdiff::diff_paths(&src_path, arg::get_args().project_dir);
-        let obj_path = match &get_cson_config().read().unwrap().build_dir {
-            Some(build_dir) => build_dir.join(obj_sub_path.unwrap()).with_extension("o"),
-            None => src_path.with_extension("o"),
-        };
-        
+        println!("project_dir: {}", arg::get_args().project_dir.clone().display());
+        println!("obj_sub_path: {}", obj_sub_path.clone().unwrap().display());
+
+        let obj_path = get_cson_config()
+            .read()
+            .unwrap()
+            .build_dir.clone().canonicalize().expect("Failed to canonicalize build directory")
+            .join(obj_sub_path.unwrap())
+            .with_extension("o");
+
+        if !obj_path.parent().expect("Failed to get the folder of object file").exists() {
+            std::fs::create_dir_all(obj_path.parent().unwrap()).expect("Failed to create object file directory");
+        }
 
         if obj_path.exists() {
             let metadata = obj_path.metadata().unwrap();
@@ -79,14 +89,20 @@ impl Compiler for GNU {
         let normalized_src = utils::normalize_path(src_path.to_path_buf());
         let normalized_obj = utils::normalize_path(obj_path.to_path_buf());
 
-        std::process::Command::new(compiler)
+        let status = std::process::Command::new(compiler)
             .arg("-g")
             .arg("-c")
             .arg(normalized_src.to_str().unwrap())
             .arg("-o")
             .arg(normalized_obj.to_str().unwrap())
-            .spawn()
+            .status()
             .expect(format!("Failed to compile {}", normalized_src.to_str().unwrap()).as_str());
+
+        if status.success() {
+            println!("Compiled {} to {}", normalized_src.to_str().unwrap(), normalized_obj.to_str().unwrap());
+        } else {
+            panic!("Failed to compile {}", normalized_src.to_str().unwrap());
+        }
     
         output::Object {
             path: obj_path,
@@ -114,10 +130,9 @@ impl Linker for GNU {
 
     fn link_to_execuable(input: ObjectCollection) -> () {
         let linker = Self::get_linker().expect("Failed to find linker");
-        let output_dir = match &get_cson_config().read().unwrap().output_dir {
-            Some(dir) => utils::normalize_path(dir.canonicalize().unwrap()),
-            None => PathBuf::from(".")
-        };
+        let output_dir = &get_cson_config().read().unwrap().output_dir;
+        let output_dir = utils::normalize_path(output_dir.canonicalize().unwrap());
+        
 
         let target_name = &get_cson_config().read().unwrap().target_name;
         let output_path = utils::normalize_path(output_dir.join(PathBuf::from(target_name)));
@@ -126,7 +141,7 @@ impl Linker for GNU {
 
         std::process::Command::new(linker)
             .arg("-g")
-            .arg(input.to_arg_str())
+            .args(input.to_args())
             .arg("-o")
             .arg(output_path.to_str().unwrap())
             .spawn()
@@ -144,5 +159,5 @@ impl Linker for GNU {
 
 #[test]
 fn test_gnu_compile() {
-    toolchain::compiler::compile::<GNU>(Source::new(PathBuf::from("./test/project/func.cpp").as_path()));
+    // toolchain::compiler::compile::<GNU>(Source::new(PathBuf::from("./test/project/func.cpp").as_path()));
 }

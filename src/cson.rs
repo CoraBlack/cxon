@@ -2,7 +2,7 @@ use std::{fs, path::{Path, PathBuf}, sync::{LazyLock, RwLock}};
 
 use serde::{Deserialize, Serialize};
 
-use crate::cli::arg;
+use crate::{cli::arg};
 
 static CONFIG: LazyLock<RwLock<CsonConfig>> = LazyLock::new(|| {
     RwLock::new({
@@ -29,8 +29,10 @@ pub struct CsonConfig {
     pub threads: Option<usize>,
 
     // temp directory
-    pub build_dir: Option<PathBuf>,
-    pub output_dir: Option<PathBuf>,
+    #[serde(default = "default_build_dir")]
+    pub build_dir: PathBuf,
+    #[serde(default = "default_output_dir")]
+    pub output_dir: PathBuf,
 
     // compiler flags
     pub flags:    Option<Vec<String>>,
@@ -66,8 +68,24 @@ impl CsonConfig {
         let cson: CsonConfig = serde_json::from_str(&content)
             .expect("Failed to parse cson configuration");
 
+        if !cson.build_dir.exists() {
+            fs::create_dir_all(&cson.build_dir).expect("Failed to clean build directory");
+        }
+
+        if !cson.output_dir.exists() {
+            fs::create_dir_all(&cson.output_dir).expect("Failed to clean output directory");
+        }
+
         cson
     }
+}
+
+fn default_build_dir() -> PathBuf {
+    PathBuf::from("./build")
+}
+
+fn default_output_dir() -> PathBuf {
+    PathBuf::from("./output")
 }
 
 #[test]
