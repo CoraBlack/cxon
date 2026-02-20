@@ -51,8 +51,6 @@ impl Compiler for GNU {
         let src_path = utils::normalize_path(src_path);
 
         let obj_sub_path = pathdiff::diff_paths(&src_path, arg::get_args().project_dir);
-        println!("project_dir: {}", arg::get_args().project_dir.clone().display());
-        println!("obj_sub_path: {}", obj_sub_path.clone().unwrap().display());
 
         let obj_path = get_cson_config()
             .read()

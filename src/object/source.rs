@@ -33,7 +33,6 @@ impl Source {
             eprintln!("Invalid source file {}", src_path.display());
             std::process::exit(-1);
         }
-        println!("extension: {}", extension);
 
         let mut src = Self { 
             src_dir: src_path.to_path_buf(), 
