@@ -6,21 +6,21 @@ use serde::{Deserialize, Serialize};
 use crate::{cli::arg::{self, get_args}, toolchain::compiler::Compiler};
 use crate::utils;
 
-static CONFIG: LazyLock<RwLock<CsonConfig>> = LazyLock::new(|| {
+static CONFIG: LazyLock<RwLock<CxonConfig>> = LazyLock::new(|| {
     RwLock::new({
         let arg = arg::get_args();
         let path = arg.project_dir;
 
-        CsonConfig::new(path.as_path())
+        CxonConfig::new(path.as_path())
     })
 });
 
-pub fn get_cson_config() -> &'static RwLock<CsonConfig> {
+pub fn get_cxon_config() -> &'static RwLock<CxonConfig> {
     &CONFIG
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CsonConfig {
+pub struct CxonConfig {
     // project settings
     pub project: String,
     pub target_name: String,
@@ -50,37 +50,37 @@ pub struct CsonConfig {
     libs:    Option<Vec<String>>,
 }
 
-impl CsonConfig {
-    pub fn new(path: &Path) -> CsonConfig {
+impl CxonConfig {
+    pub fn new(path: &Path) -> CxonConfig {
         let file_path = if path.is_dir() {
-            path.join("cson.json")
+            path.join("cxon.json")
         } else {
             path.to_path_buf()
         };
 
         let content = fs::read_to_string(&file_path).expect(
             format!(
-                "Failed to read cson.json file from {}",
+                "Failed to read cxon.json file from {}",
                 file_path.to_string_lossy()
             )
             .as_str(),
         );
 
-        let cson: CsonConfig = serde_json::from_str(&content)
-            .expect("Failed to parse cson configuration");
+        let cxon: CxonConfig = serde_json::from_str(&content)
+            .expect("Failed to parse cxon configuration");
 
         // Source file check
-        if cson.sources.is_none() || cson.sources.as_ref().unwrap().is_empty() {
-            panic!("No source files specified in cson configuration");
+        if cxon.sources.is_none() || cxon.sources.as_ref().unwrap().is_empty() {
+            panic!("No source files specified in cxon configuration");
         }
 
         // Toolchain check
         let supported_toolchains = ["gnu", "llvm", "msvc"];
-        if !supported_toolchains.contains(&cson.toolchain.as_str()) {
-            panic!("Unsupported toolchain: {}. Supported toolchains are: {:?}", cson.toolchain, supported_toolchains);
+        if !supported_toolchains.contains(&cxon.toolchain.as_str()) {
+            panic!("Unsupported toolchain: {}. Supported toolchains are: {:?}", cxon.toolchain, supported_toolchains);
         }
 
-        cson.resolve_paths()
+        cxon.resolve_paths()
     }
 
     fn init_dir(path: PathBuf, cda: bool) -> PathBuf {
@@ -106,23 +106,23 @@ impl CsonConfig {
     }
 
     fn resolve_paths(self) -> Self {
-        let mut cson = self;
+        let mut cxon = self;
 
         // Create build and output directories if they don't exist
-        cson.build_dir  = Self::init_dir(cson.build_dir, true);
-        cson.output_dir = Self::init_dir(cson.output_dir, true);
+        cxon.build_dir  = Self::init_dir(cxon.build_dir, true);
+        cxon.output_dir = Self::init_dir(cxon.output_dir, true);
 
-        if let Some(sources) = cson.sources {
-            cson.sources = Some(Self::init_dirs(sources, false));
+        if let Some(sources) = cxon.sources {
+            cxon.sources = Some(Self::init_dirs(sources, false));
         }
-        if let Some(includes) = cson.include {
-            cson.include = Some(Self::init_dirs(includes, false));
+        if let Some(includes) = cxon.include {
+            cxon.include = Some(Self::init_dirs(includes, false));
         }
-        if let Some(links) = cson.link {
-            cson.link    = Some(Self::init_dirs(links, false));
+        if let Some(links) = cxon.link {
+            cxon.link    = Some(Self::init_dirs(links, false));
         }
     
-        cson
+        cxon
     }
 
     pub fn get_define_args<T: Compiler>(&self) -> Vec<String> {
@@ -187,7 +187,7 @@ fn default_output_dir() -> PathBuf {
 }
 
 #[test]
-fn test_cson() {
-    let config = CsonConfig::new("./cson.json".as_ref());
+fn test_cxon() {
+    let config = CxonConfig::new("./cxon.json".as_ref());
     println!("Project: {:?}", config);
 }

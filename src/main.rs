@@ -19,12 +19,12 @@ pub mod toolchain;
 
 pub mod utils;
 
-pub mod cson;
+pub mod cxon;
 
 fn main() -> () {
-    let cson = cson::get_cson_config();
+    let cxon = cxon::get_cxon_config();
 
-    let source_paths = cson.read().unwrap().sources.clone().expect("No source files specified in cson configuration");
+    let source_paths = cxon.read().unwrap().sources.clone().expect("No source files specified in cxon configuration");
 
     let mut objects = ObjectCollection{
         objects: Vec::new(),

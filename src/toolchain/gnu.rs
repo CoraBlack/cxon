@@ -5,7 +5,7 @@ use std::time::SystemTime;
 use which::which;
 
 use crate::cli::arg;
-use crate::cson::get_cson_config;
+use crate::cxon::get_cxon_config;
 use crate::object::output::{self, Object, ObjectCollection, SharedLib, StaticLib};
 use crate::object::source::Source;
 use crate::toolchain::compiler::{Compiler, CompilerPair};
@@ -50,7 +50,7 @@ impl Compiler for GNU {
 
         let obj_sub_path = pathdiff::diff_paths(&src_path, arg::get_args().project_dir);
 
-        let obj_path = get_cson_config()
+        let obj_path = get_cxon_config()
             .read()
             .unwrap()
             .build_dir
@@ -88,8 +88,8 @@ impl Compiler for GNU {
             .arg(src_path.to_str().unwrap())
             .arg("-o")
             .arg(obj_path.to_str().unwrap())
-            .args(get_cson_config().read().unwrap().get_define_args::<Self>())
-            .args(get_cson_config().read().unwrap().get_include_dir_args::<Self>())
+            .args(get_cxon_config().read().unwrap().get_define_args::<Self>())
+            .args(get_cxon_config().read().unwrap().get_include_dir_args::<Self>())
             .status()
             .expect(format!("Failed to compile {}", src_path.to_str().unwrap()).as_str());
 
@@ -125,9 +125,9 @@ impl Linker for GNU {
 
     fn link_to_execuable(input: ObjectCollection) -> () {
         let linker = Self::get_linker().expect("Failed to find linker");
-        let output_dir = &get_cson_config().read().unwrap().output_dir;
+        let output_dir = &get_cxon_config().read().unwrap().output_dir;
 
-        let target_name = &get_cson_config().read().unwrap().target_name;
+        let target_name = &get_cxon_config().read().unwrap().target_name;
         let output_path = output_dir.join(PathBuf::from(target_name));
 
         std::process::Command::new(linker)
@@ -135,8 +135,8 @@ impl Linker for GNU {
             .args(input.to_args())
             .arg("-o")
             .arg(output_path.to_str().unwrap())
-            .args(get_cson_config().read().unwrap().get_link_dir_args::<Self>())
-            .args(get_cson_config().read().unwrap().get_lib_args::<Self>())
+            .args(get_cxon_config().read().unwrap().get_link_dir_args::<Self>())
+            .args(get_cxon_config().read().unwrap().get_lib_args::<Self>())
             .status()
             .expect(format!("Failed to link executable {}", output_path.to_str().unwrap()).as_str());
     }

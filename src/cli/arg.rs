@@ -26,11 +26,11 @@ impl CliArgs {
 
         let project_dir = PathBuf::from(arg_col[1].clone());
         if !project_dir.exists() {
-            Err(()).expect("cson project dir is not available")
+            Err(()).expect("cxon project dir is not available")
         }
 
-        // remove cson.json if it's included in the path
-        let project_dir = if project_dir.is_file() && project_dir.file_name().unwrap() == "cson.json" {
+        // remove cxon.json if it's included in the path
+        let project_dir = if project_dir.is_file() && project_dir.file_name().unwrap() == "cxon.json" {
             project_dir.parent().unwrap().to_path_buf()
         } else {
             project_dir
