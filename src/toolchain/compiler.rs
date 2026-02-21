@@ -10,6 +10,10 @@ pub struct CompilerPair {
 }
 
 pub trait Compiler {
+    const DEFINE_FLAG_PREFIX:   &'static str;
+    const INCLUDE_FLAG_PREFIX:  &'static str;
+    const LINK_DIR_FLAG_PREFIX: &'static str;
+    const LINK_LIB_FLAG_PREFIX: &'static str;
     fn get_compiler() -> CompilerPair;
 
     fn compile(src: Source) -> Object;

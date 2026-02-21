@@ -4,8 +4,7 @@
     "build_dir": "build",
     "output_dir": "bin",
 
-    "cc": "gcc",
-    "cxx": "g++",
+    "toolchain": "gnu",
 
     "flags": [
         "-Wall",
@@ -21,7 +20,7 @@
     ],
 
     "include": [
-        "./test/project/"
+        
     ],
 
     "defines": [

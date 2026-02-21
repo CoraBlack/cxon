@@ -15,14 +15,7 @@ pub mod object {
     pub mod output;
     pub mod source;
 }
-
-pub mod toolchain {
-    pub mod compiler;
-    pub mod linker;
-    pub mod gnu;
-    // pub mod llvm;
-    // pub mod msvc;
-}
+pub mod toolchain;
 
 pub mod utils;
 
@@ -31,12 +24,13 @@ pub mod cson;
 fn main() -> () {
     let cson = cson::get_cson_config();
 
-    let source_paths = &cson.read().unwrap().sources.clone().expect("No source file");
+    let source_paths = cson.read().unwrap().sources.clone().expect("No source files specified in cson configuration");
+
     let mut objects = ObjectCollection{
         objects: Vec::new(),
     };
     for path in source_paths {
-        let source = Source::new(path);
+        let source = Source::new(&path);
         let obj = toolchain::compiler::compile::<GNU>(source);
         objects.objects.push(obj);
     }

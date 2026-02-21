@@ -29,6 +29,13 @@ impl CliArgs {
             Err(()).expect("cson project dir is not available")
         }
 
+        // remove cson.json if it's included in the path
+        let project_dir = if project_dir.is_file() && project_dir.file_name().unwrap() == "cson.json" {
+            project_dir.parent().unwrap().to_path_buf()
+        } else {
+            project_dir
+        };
+
         let project_dir = 
             if project_dir.is_absolute() { project_dir } else { project_dir.canonicalize().unwrap() };
 

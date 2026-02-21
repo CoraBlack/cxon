@@ -1,5 +1,7 @@
 use std::{path::{Path, PathBuf}, time::SystemTime};
 
+use crate::cli::arg;
+
 pub struct Source {
     src_dir: PathBuf,
     pub modified: Option<SystemTime>
@@ -8,6 +10,8 @@ pub struct Source {
 impl Source {
     pub fn new(src_path: &Path) -> Self {
         let src_path = if src_path.is_relative() {
+            let project_dir = &arg::get_args().project_dir.clone();
+            let src_path = project_dir.join(src_path);
             src_path.canonicalize()
                 .expect(format!("Invalid source file {}", src_path.display()).as_str())
         } else {
