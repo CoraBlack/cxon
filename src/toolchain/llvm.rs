@@ -1,13 +1,13 @@
 use crate::toolchain::ToolChainTrait;
 
-pub struct GNU{
+pub struct LLVM {
     #[allow(dead_code)] data: ()
 }
 
-impl ToolChainTrait for GNU {
-    const CC:     &'static str = "gcc";
-    const CXX:    &'static str = "g++";
-    const LINKER: &'static str = "g++";
+impl ToolChainTrait for LLVM {
+    const CC:     &'static str = "clang";
+    const CXX:    &'static str = "clang++";
+    const LINKER: &'static str = "clang++";
     const DEBUG_FLAG:  &'static str = "-g";
     const OUTPUT_FLAG: &'static str = "-o";
     const ONLY_COMPILE_FLAG:    &'static str = "-c";
