@@ -1,6 +1,4 @@
-use std::{env::current_dir, error::Error, fs, path::PathBuf, process::Stdio};
-
-use crate::{cli::arg, object::{output::ObjectCollection, source::Source}, toolchain::gnu::GNU};
+use crate::{object::{output::ObjectCollection, source::Source}, toolchain::gnu::GNU};
 
 pub mod cli {
     // pub mod app;

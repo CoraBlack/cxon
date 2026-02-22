@@ -125,6 +125,36 @@ impl CxonConfig {
         cxon
     }
 
+    pub fn get_compile_flags(&self) -> Vec<String> {
+        let mut flags = Vec::new();
+
+        if let Some(f) = &self.flags {
+            flags.extend(f.clone());
+        }
+
+        flags
+    }
+
+    pub fn get_cflags(&self) -> Vec<String> {
+        let mut flags = Vec::new();
+
+        if let Some(f) = &self.cflags {
+            flags.extend(f.clone());
+        }
+
+        flags
+    }
+
+    pub fn get_cxxflags(&self) -> Vec<String> {
+        let mut flags = Vec::new();
+
+        if let Some(f) = &self.cxxflags {
+            flags.extend(f.clone());
+        }
+
+        flags
+    }
+
     pub fn get_define_args<T: Compiler>(&self) -> Vec<String> {
         let mut args = Vec::new();
         let Some(defines) = &self.defines else {

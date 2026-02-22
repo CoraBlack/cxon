@@ -82,6 +82,15 @@ impl Compiler for GNU {
              ext => panic!("Unsupported source file extension: {}", ext),
         };
 
+        let mut flags = if compiler == &cc {
+            get_cxon_config().read().unwrap().get_cflags()
+        } else {
+            get_cxon_config().read().unwrap().get_cxxflags()
+        };
+        flags.extend(get_cxon_config().read().unwrap().get_compile_flags());
+
+        println!("Compile flags: {:?}", flags);
+
         let status = std::process::Command::new(compiler)
             .arg("-g")
             .arg("-c")
@@ -90,6 +99,7 @@ impl Compiler for GNU {
             .arg(obj_path.to_str().unwrap())
             .args(get_cxon_config().read().unwrap().get_define_args::<Self>())
             .args(get_cxon_config().read().unwrap().get_include_dir_args::<Self>())
+            .args(flags)
             .status()
             .expect(format!("Failed to compile {}", src_path.to_str().unwrap()).as_str());
 
