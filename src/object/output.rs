@@ -20,14 +20,14 @@ impl ObjectCollection {
     }
 }
 
-pub struct Execuable {
+// pub struct Execuable {
 
-}
+// }
 
-pub struct StaticLib {
+// pub struct StaticLib {
 
-}
+// }
 
-pub struct SharedLib {
+// pub struct SharedLib {
     
-}
+// }

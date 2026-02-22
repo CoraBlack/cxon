@@ -3,7 +3,7 @@ use std::{fs, path::{Path, PathBuf}, sync::{LazyLock, RwLock}};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{cli::arg::{self, get_args}, toolchain::compiler::Compiler};
+use crate::{cli::arg::{self, get_args}, toolchain::{TargetType, ToolChain, ToolChainTrait}};
 use crate::utils;
 
 static CONFIG: LazyLock<RwLock<CxonConfig>> = LazyLock::new(|| {
@@ -21,10 +21,17 @@ pub fn get_cxon_config() -> &'static RwLock<CxonConfig> {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CxonConfig {
-    // project settings
     pub project: String,
-    pub target_name: String,
+
+    // build settings
+    target_name: Option<String>,
+    #[serde(default = "default_target_type")]
+    target_type: String, // "executable", "static_lib", "shared_lib"
+
+    // toolchain settings
     pub toolchain: String,
+    pub cc:  Option<String>,
+    pub cxx: Option<String>,
 
     // building settings
     pub threads: Option<usize>,
@@ -66,8 +73,19 @@ impl CxonConfig {
             .as_str(),
         );
 
-        let cxon: CxonConfig = serde_json::from_str(&content)
+        let mut cxon: CxonConfig = serde_json::from_str(&content)
             .expect("Failed to parse cxon configuration");
+
+        // Target name check
+        if cxon.target_name.is_none() {
+            cxon.target_name = Some(cxon.project.clone())
+        }
+
+        // build target type check
+        let target_type = cxon.target_type.clone().to_lowercase();
+        if !["executable", "static_lib", "shared_lib"].contains(&target_type.as_str()) {
+            panic!("Unsupported target type: {}. Supported target types are: executable, static_lib, shared_lib", cxon.target_type);
+        }
 
         // Source file check
         if cxon.sources.is_none() || cxon.sources.as_ref().unwrap().is_empty() {
@@ -125,7 +143,30 @@ impl CxonConfig {
         cxon
     }
 
-    pub fn get_compile_flags(&self) -> Vec<String> {
+    pub fn get_target_name(&self) -> String {
+        self.target_name.clone().unwrap()
+    }
+
+    pub fn get_target_type(&self) -> TargetType {
+        match self.target_type.to_lowercase().as_str() {
+            "object_lib" => TargetType::ObjectLib,
+            "executable" => TargetType::Executable,
+            "static_lib" => TargetType::StaticLib,
+            "shared_lib" => TargetType::SharedLib,
+            _ => panic!("Unsupported target type: {}. Supported target types are: executable, static_lib, shared_lib", self.target_type),
+        }
+    }
+
+    pub fn get_toolchain(&self) -> ToolChain {
+        match self.toolchain.to_lowercase().as_str() {
+            "gnu"  => ToolChain::GNU(),
+            "llvm" => ToolChain::LLVM(),
+            "msvc" => ToolChain::MSVC(),
+            _ => panic!("Unsupported toolchain: {}. Supported toolchains are: gnu, llvm, msvc", self.toolchain),
+        }
+    }
+
+    fn get_compiler_flags(&self) -> Vec<String> {
         let mut flags = Vec::new();
 
         if let Some(f) = &self.flags {
@@ -136,7 +177,7 @@ impl CxonConfig {
     }
 
     pub fn get_cflags(&self) -> Vec<String> {
-        let mut flags = Vec::new();
+        let mut flags = self.get_compiler_flags();
 
         if let Some(f) = &self.cflags {
             flags.extend(f.clone());
@@ -146,7 +187,7 @@ impl CxonConfig {
     }
 
     pub fn get_cxxflags(&self) -> Vec<String> {
-        let mut flags = Vec::new();
+        let mut flags = self.get_compiler_flags();
 
         if let Some(f) = &self.cxxflags {
             flags.extend(f.clone());
@@ -155,7 +196,7 @@ impl CxonConfig {
         flags
     }
 
-    pub fn get_define_args<T: Compiler>(&self) -> Vec<String> {
+    pub fn get_define_args<T: ToolChainTrait>(&self) -> Vec<String> {
         let mut args = Vec::new();
         let Some(defines) = &self.defines else {
             return args;
@@ -168,7 +209,7 @@ impl CxonConfig {
         args
     }
 
-    pub fn get_include_dir_args<T: Compiler>(&self) -> Vec<String> {
+    pub fn get_include_dir_args<T: ToolChainTrait>(&self) -> Vec<String> {
         let mut args = Vec::new();
         let Some(include_dirs) = &self.include else {
             return args;
@@ -181,7 +222,7 @@ impl CxonConfig {
         args
     }
 
-    pub fn get_link_dir_args<T: Compiler>(&self) -> Vec<String> {
+    pub fn get_link_dir_args<T: ToolChainTrait>(&self) -> Vec<String> {
         let mut args = Vec::new();
         let Some(link_dirs) = &self.link else {
             return args;
@@ -194,7 +235,7 @@ impl CxonConfig {
         args
     }
 
-    pub fn get_lib_args<T: Compiler>(&self) -> Vec<String> {
+    pub fn get_lib_args<T: ToolChainTrait>(&self) -> Vec<String> {
         let mut args = Vec::new();
         let Some(libs) = &self.libs else {
             return args;
@@ -206,6 +247,10 @@ impl CxonConfig {
 
         args
     }
+}
+
+fn default_target_type() -> String {
+    "execuable".to_string()
 }
 
 fn default_build_dir() -> PathBuf {

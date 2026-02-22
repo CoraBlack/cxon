@@ -3,12 +3,12 @@
 > [!IMPORTANT]
 >
 > - cxon is still in development, and the configrantion field is not stable yet.
-> - cxon is not only a build system, but also a configuration tool for build systems.
 
 ## Features(Order by priority)
 
-- [x] Build project with compiler and linker by cxon.json immediately.(only GNU)
-- [ ] Build cache and mult-thread.
+- [x] Build project with compiler and linker by cxon.json immediately.(unsupport custom)
+- [x] Build cache
+- [ ] Mult-thread build.
 - [ ] Submodule support.
 - [ ] Multiple compile targets.
 - [ ] Platform-specific configuration.
@@ -22,12 +22,17 @@ We only require a small number of essential fields for cxon.json and make the bu
 ## cxon.json Example
 ```json5
 {
-    "project": "HelloWorld",    // project name
-    "target_name": "HelloWorld",// the final compiled product name
+    "project": "HelloWorld",    // (Required) project name
+    "target_name": "hello",     // the final compiled product name, the default value is the project field
+    "target_type": "execuable", // (Required) build type (execuable(only currently), static_lib, shared_lib, object_lib)
     "build_dir": "build",       // the directory storing intermediate compiled product
     "output_dir": "bin",        // the directory storing final compiled product
 
-    "toolchain": "gnu",         // unsuport currently but required
+    "toolchain": "gnu",         // gnu, llvm, msvc only currently
+    "cc": "",                   // (unsupport) custom c compiler
+    "cxx": "",                  // (unsupport) custom c++ compiler
+
+    "threads": 4,               // (unsupport) count of build threads
 
     "flags": [                  // parameters for c and c++ compiler
         "-Wall",
@@ -50,7 +55,7 @@ We only require a small number of essential fields for cxon.json and make the bu
 
     ],
 
-    "sources": [                // source files which will be compiled
+    "sources": [                // (Required) source files which will be compiled
         "./main.cpp",
         "./func.cpp"
     ],
