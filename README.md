@@ -4,15 +4,26 @@
 >
 > - cxon is still in development, and the configrantion field is not stable yet.
 
+## Installation
+
+- ### Build and insall from cargo
+```sh
+cargo install cxon
+```
+
+- ### [Install directly from github release](https://github.com/CoraBlack/cxon/releases)
+
 ## Features(Order by priority)
 
 - [x] Build project with compiler and linker by cxon.json immediately.(unsupport custom)
 - [x] Build cache
 - [x] Mult-thread build.
+- [x] Muti-build-target.
+- [ ] cxon.json schema support 
+- [ ] Debug field support(Only debug currently).
 - [ ] Submodule support.
 - [ ] Multiple compile targets.
 - [ ] Platform-specific configuration.
-- [ ] Build for cmake.
 
 ## What is the goal for cxon?
 
@@ -24,7 +35,7 @@ We only require a small number of essential fields for cxon.json and make the bu
 {
     "project": "HelloWorld",    // (Required) project name
     "target_name": "hello",     // the final compiled product name, the default value is the project field
-    "target_type": "execuable", // (Required) build type (execuable(only currently), static_lib, shared_lib, object_lib)
+    "target_type": "execuable", // (Required) build type (execuable, static_lib, shared_lib, object_lib)
     "build_dir": "build",       // the directory storing intermediate compiled product
     "output_dir": "bin",        // the directory storing final compiled product
 
