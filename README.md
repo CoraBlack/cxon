@@ -18,10 +18,11 @@ cargo install cxon
 - [x] Build project with compiler and linker by cxon.json immediately.(unsupport custom)
 - [x] Build cache
 - [x] Mult-thread build.
+- [x] Muti-build-target.
+- [ ] Debug field support(Only debug currently).
 - [ ] Submodule support.
 - [ ] Multiple compile targets.
 - [ ] Platform-specific configuration.
-- [ ] Build for cmake.
 
 ## What is the goal for cxon?
 
