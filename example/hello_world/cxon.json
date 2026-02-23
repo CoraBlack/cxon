@@ -15,10 +15,11 @@
     ],
 
     "cxxflags": [
-
+        "-std=c++11"
     ],
 
     "include": [
+        "./include/"
     ],
 
     "defines": [
@@ -26,8 +27,8 @@
     ],
 
     "sources": [
-        "test/project/main.cpp",
-        "test/project/func.cpp"
+        "./main.cpp",
+        "./func.cpp"
     ],
 
     "link": [

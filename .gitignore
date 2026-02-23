@@ -2,3 +2,7 @@
 /target/
 /bin/
 /build/
+
+# example production files
+/example/hello_world/bin/
+/example/hello_world/build/

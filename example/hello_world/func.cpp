@@ -1,6 +1,6 @@
 #include "func.hpp"
 #include <cstdio>
 
-void helloworld() {
+auto helloworld() -> void {
     printf("hello world\n");
 }
