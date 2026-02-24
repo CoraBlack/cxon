@@ -18,7 +18,8 @@ cargo install cxon
 - [x] Build project with compiler and linker by cxon.json immediately.(unsupport custom)
 - [x] Build cache
 - [x] Mult-thread build.
-- [x] Muti-build-target.
+- [x] Mutiple build target type.
+- [x] cxon.json schema support 
 - [x] Export compile_commands.json
 - [ ] Debug field support(Only debug currently).
 - [ ] Submodule support.
@@ -33,17 +34,15 @@ We only require a small number of essential fields for cxon.json and make the bu
 ## cxon.json Example
 ```json5
 {
-    "project": "HelloWorld",            // (Required) project name
-    "target_name": "hello",             // the final compiled product name, the default value is the project field
-    "target_type": "execuable",         // build type (execuable, static_lib, shared_lib, object_lib), the default value is execuable
-    "build_dir": "build",               // the directory storing intermediate compiled product
-    "output_dir": "bin",                // the directory storing final compiled product
-    "export_compile_commands": true,    // export compile_commands.json file to `export_compile_commands_path`
-    "export_compile_commands_path": "", // the default value is same as `build_dir`
+    "project": "HelloWorld",    // (Required) project name
+    "target_name": "hello",     // the final compiled product name, the default value is the project field
+    "target_type": "execuable", // (Required) build type (execuable, static_lib, shared_lib, object_lib)
+    "build_dir": "build",       // the directory storing intermediate compiled product
+    "output_dir": "bin",        // the directory storing final compiled product
 
-    "toolchain": "gnu",                 // (unsupport) gnu, llvm, msvc only currently
-    "cc": "",                           // (unsupport) custom c compiler
-    "cxx": "",                          // (unsupport) custom c++ compiler
+    "toolchain": "gnu",         // (unsupport) gnu, llvm, msvc only currently
+    "cc": "",                   // (unsupport) custom c compiler
+    "cxx": "",                  // (unsupport) custom c++ compiler
 
     "threads": 4,                       // count of build threads, the default value is number of your cpu - 1
 
