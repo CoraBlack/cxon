@@ -13,6 +13,18 @@ cargo install cxon
 
 - ### [Install directly from github release](https:     //github.com/CoraBlack/cxon/releases)
 
+## cxon.json schema support
+```json5
+{
+    // beginning your cxon with field $schema to get cxon competition intellisence
+    "$schema": "https://corablack.github.io/cxon_schema/cxon.schema.json"
+
+    // other config
+}
+```
+
+the schema service is deployed (here)[https://github.com/CoraBlack/cxon_schema/tree/main]
+
 ## Features(Order by priority)
 
 - [x] Build project with compiler and linker by cxon.json immediately.(unsupport custom)
