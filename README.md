@@ -18,7 +18,7 @@ cargo install cxon
 - [x] Build project with compiler and linker by cxon.json immediately.(unsupport custom)
 - [x] Build cache
 - [x] Mult-thread build.
-- [x] Muti-build-target.
+- [x] Mutiple build target type.
 - [x] cxon.json schema support 
 - [ ] Debug field support(Only debug currently).
 - [ ] Submodule support.
