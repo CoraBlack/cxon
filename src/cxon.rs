@@ -1,10 +1,17 @@
 use core::panic;
-use std::{fs, path::{Path, PathBuf}, sync::{LazyLock, RwLock}};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    sync::{LazyLock, RwLock},
+};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{cli::arg::{self, get_args}, toolchain::{TargetType, ToolChain, ToolChainTrait}};
 use crate::utils;
+use crate::{
+    cli::arg::{self, get_args},
+    toolchain::{TargetType, ToolChain, ToolChainTrait},
+};
 
 static CONFIG: LazyLock<RwLock<CxonConfig>> = LazyLock::new(|| {
     RwLock::new({
@@ -33,7 +40,7 @@ pub struct CxonConfig {
 
     // toolchain settings
     pub toolchain: String,
-    pub cc:  Option<String>,
+    pub cc: Option<String>,
     pub cxx: Option<String>,
 
     // building settings
@@ -49,8 +56,8 @@ pub struct CxonConfig {
     debug: bool,
 
     // compiler flags
-    flags:    Option<Vec<String>>,
-    cflags:   Option<Vec<String>>,
+    flags: Option<Vec<String>>,
+    cflags: Option<Vec<String>>,
     cxxflags: Option<Vec<String>>,
 
     // source files
@@ -59,8 +66,8 @@ pub struct CxonConfig {
     // compiler defines and includes
     defines: Option<Vec<String>>,
     include: Option<Vec<PathBuf>>,
-    link:    Option<Vec<PathBuf>>,
-    libs:    Option<Vec<String>>,
+    link: Option<Vec<PathBuf>>,
+    libs: Option<Vec<String>>,
 }
 
 impl CxonConfig {
@@ -79,35 +86,49 @@ impl CxonConfig {
             .as_str(),
         );
 
-        let mut cxon: CxonConfig = serde_json::from_str(&content)
-            .expect("Failed to parse cxon configuration");
+        let mut cxon: CxonConfig =
+            serde_json::from_str(&content).expect("Failed to parse cxon configuration");
 
+        cxon
+    }
+
+    pub fn is_ready(mut self) -> Result<Self, Box<dyn std::error::Error>> {
         // Target name check
-        if cxon.target_name.is_none() {
-            cxon.target_name = Some(cxon.project.clone())
+        if self.target_name.is_none() {
+            self.target_name = Some(self.project.clone())
         }
 
         // build target type check
-        let target_type = cxon.target_type.clone().to_lowercase();
-        if !["executable", "static_lib", "shared_lib", "object_lib"].contains(&target_type.as_str()) {
-            panic!("Unsupported target type: {}. Supported target types are: executable, static_lib, shared_lib, object_lib", cxon.target_type);
+        let target_type = self.target_type.clone().to_lowercase();
+        if !["executable", "static_lib", "shared_lib", "object_lib"].contains(&target_type.as_str())
+        {
+            return Err(format!(
+                "Unsupported target type: {}. Supported target types are: executable, static_lib, shared_lib, object_lib",
+                self.target_type).into()
+            );
         }
 
         // Source file check
-        if cxon.sources.is_none() || cxon.sources.as_ref().unwrap().is_empty() {
-            panic!("No source files specified in cxon configuration");
+        if self.sources.is_none() || self.sources.as_ref().unwrap().is_empty() {
+            return Err("No source files specified in cxon configuration".into());
         }
 
         // Toolchain check
         let supported_toolchains = ["gnu", "llvm", "msvc"];
-        if !supported_toolchains.contains(&cxon.toolchain.as_str()) {
-            panic!("Unsupported toolchain: {}. Supported toolchains are: {:?}", cxon.toolchain, supported_toolchains);
+        if !supported_toolchains.contains(&self.toolchain.as_str()) {
+            return Err(format!(
+                "Unsupported toolchain: {}. Supported toolchains are: {:?}",
+                self.toolchain, supported_toolchains
+            )
+            .into());
         }
 
-        cxon.resolve_paths()
+        self = self.resolve_paths()?;
+
+        Ok(self)
     }
 
-    fn init_dir(path: PathBuf, cda: bool) -> PathBuf {
+    fn init_dir(path: PathBuf, cda: bool) -> Result<PathBuf, Box<dyn std::error::Error>> {
         let path = if !path.is_absolute() {
             get_args().project_dir.join(path)
         } else {
@@ -116,41 +137,48 @@ impl CxonConfig {
 
         if !path.exists() {
             if !cda {
-                panic!("Directory {} does not exist", path.to_string_lossy());
+                return Err("Path is not exist!".into());
             }
 
-            fs::create_dir_all(&path).expect(format!("Failed to create {}", path.to_string_lossy()).as_str());
+            fs::create_dir_all(&path)
+                .expect(format!("Failed to create {}", path.to_string_lossy()).as_str());
         }
 
         utils::normalize_and_canonicalize_path(path)
     }
 
-    fn init_dirs(paths: Vec<PathBuf>, cda: bool) -> Vec<PathBuf> {
-        paths.into_iter().map(|path| Self::init_dir(path, cda)).collect()
+    fn init_dirs(
+        paths: Vec<PathBuf>,
+        cda: bool,
+    ) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+        paths
+            .into_iter()
+            .map(|path| Self::init_dir(path, cda))
+            .collect()
     }
 
-    fn resolve_paths(self) -> Self {
+    fn resolve_paths(self) -> Result<Self, Box<dyn std::error::Error>> {
         let mut cxon = self;
 
         // Create build and output directories if they don't exist
-        cxon.build_dir  = Self::init_dir(cxon.build_dir, true);
-        cxon.output_dir = Self::init_dir(cxon.output_dir, true);
+        cxon.build_dir = Self::init_dir(cxon.build_dir, true)?;
+        cxon.output_dir = Self::init_dir(cxon.output_dir, true)?;
 
         if let Some(export_path) = &cxon.export_compile_commands_path {
-            cxon.export_compile_commands_path = Some(Self::init_dir(export_path.clone(), true));
+            cxon.export_compile_commands_path = Some(Self::init_dir(export_path.clone(), true)?);
         }
 
         if let Some(sources) = cxon.sources {
-            cxon.sources = Some(Self::init_dirs(sources, false));
+            cxon.sources = Some(Self::init_dirs(sources, false)?);
         }
         if let Some(includes) = cxon.include {
-            cxon.include = Some(Self::init_dirs(includes, false));
+            cxon.include = Some(Self::init_dirs(includes, false)?);
         }
         if let Some(links) = cxon.link {
-            cxon.link    = Some(Self::init_dirs(links, false));
+            cxon.link = Some(Self::init_dirs(links, false)?);
         }
-    
-        cxon
+
+        Ok(cxon)
     }
 
     pub fn get_target_name(&self) -> String {
@@ -163,16 +191,22 @@ impl CxonConfig {
             "executable" => TargetType::Executable,
             "static_lib" => TargetType::StaticLib,
             "shared_lib" => TargetType::SharedLib,
-            _ => panic!("Unsupported target type: {}. Supported target types are: executable, static_lib, shared_lib", self.target_type),
+            _ => panic!(
+                "Unsupported target type: {}. Supported target types are: executable, static_lib, shared_lib",
+                self.target_type
+            ),
         }
     }
 
     pub fn get_toolchain(&self) -> ToolChain {
         match self.toolchain.to_lowercase().as_str() {
-            "gnu"  => ToolChain::GNU(),
+            "gnu" => ToolChain::GNU(),
             "llvm" => ToolChain::LLVM(),
             "msvc" => ToolChain::MSVC(),
-            _ => panic!("Unsupported toolchain: {}. Supported toolchains are: gnu, llvm, msvc", self.toolchain),
+            _ => panic!(
+                "Unsupported toolchain: {}. Supported toolchains are: gnu, llvm, msvc",
+                self.toolchain
+            ),
         }
     }
 
@@ -230,7 +264,11 @@ impl CxonConfig {
         };
 
         for include_dir in include_dirs {
-            args.push(format!("{}{}", T::INCLUDE_FLAG_PREFIX, include_dir.to_str().unwrap().to_string()));
+            args.push(format!(
+                "{}{}",
+                T::INCLUDE_FLAG_PREFIX,
+                include_dir.to_str().unwrap().to_string()
+            ));
         }
 
         args
@@ -243,7 +281,11 @@ impl CxonConfig {
         };
 
         for link_dir in link_dirs {
-            args.push(format!("{}{}", T::LINK_DIR_FLAG_PREFIX, link_dir.to_str().unwrap().to_string()));
+            args.push(format!(
+                "{}{}",
+                T::LINK_DIR_FLAG_PREFIX,
+                link_dir.to_str().unwrap().to_string()
+            ));
         }
 
         args
