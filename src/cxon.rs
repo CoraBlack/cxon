@@ -70,6 +70,8 @@ pub struct CxonConfig {
 
     // toolchain settings
     pub toolchain: String,
+    pub cc_prefix: Option<String>,
+    pub cxxc_prefix: Option<String>,
     pub cc: Option<String>,
     pub cxx: Option<String>,
 

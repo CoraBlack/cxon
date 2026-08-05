@@ -71,9 +71,22 @@ pub fn compile<T: ToolChainTrait>(src: Source, cxon: &CxonConfig) -> Object {
         src_path: src.get_path().to_path_buf(),
         obj_path: obj_path.clone(),
         compiler: if is_c_file {
-            T::CC.to_string()
+            let prefix_opt = cxon.cc_prefix.clone();
+            if let Some(mut full_cc) = prefix_opt {
+                full_cc.push_str(T::CC);
+                full_cc   
+            } else {
+                T::CC.to_string()
+            }
+            
         } else {
-            T::CXX.to_string()
+            let prefix_opt = cxon.cxxc_prefix.clone();
+            if let Some(mut full_cxxc) = prefix_opt {
+                full_cxxc.push_str(T::CXX);
+                full_cxxc
+            } else {
+                T::CXX.to_string()
+            }
         },
         flags: flags,
         defines: cxon.get_define_args::<T>(),
