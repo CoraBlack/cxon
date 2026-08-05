@@ -6,6 +6,24 @@
 > - `cxon` has been published now!
 > - `cxon` is for C++ beginners and build system learners. It not having enough rich features is intentional.
 
+## What is the goal for cxon?
+
+We want to provide a build system that is easy to use and config for C++ beginners or who are not the programming prefessors, which can help them focus on their project and code instrendad of dealing with the build system configration.  
+We only require a small number of essential fields for cxon.json and make the build system configration as simple as possible.
+
+
+## Features
+
+- [x] Build project with compiler and linker by cxon.json immediately.(unsupport custom)
+- [x] Build cache
+- [x] Mult-thread build.
+- [x] Mutiple build target type.
+- [x] cxon.json schema support 
+- [x] Export compile_commands.json
+- [x] Submodule support.
+- [ ] Multiple compile targets.
+- [ ] Platform-specific configuration.
+
 ## Installation
 
 - ### Build and insall from cargo
@@ -26,23 +44,6 @@ cargo install cxon
 ```
 
 the schema service is deployed [here](https://github.com/CoraBlack/cxon_schema/tree/main)
-
-## Features(Order by priority)
-
-- [x] Build project with compiler and linker by cxon.json immediately.(unsupport custom)
-- [x] Build cache
-- [x] Mult-thread build.
-- [x] Mutiple build target type.
-- [x] cxon.json schema support 
-- [x] Export compile_commands.json
-- [x] Submodule support.
-- [ ] Multiple compile targets.
-- [ ] Platform-specific configuration.
-
-## What is the goal for cxon?
-
-We want to provide a build system that is easy to use and config for C++ beginners or who are not the programming prefessors, which can help them focus on their project and code instrendad of dealing with the build system configration.  
-We only require a small number of essential fields for cxon.json and make the build system configration as simple as possible.
 
 ## cxon.json Example
 ```json5
