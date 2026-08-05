@@ -2,7 +2,9 @@
 
 > [!IMPORTANT]
 >
-> - cxon is still in development, and the configrantion field is not stable yet.
+> - ~~cxon is still in development, and the configrantion field is not stable yet.~~
+> - `cxon` has been published now!
+> - `cxon` is for C++ beginners and build system learners. It not having enough rich features is intentional.
 
 ## Installation
 
