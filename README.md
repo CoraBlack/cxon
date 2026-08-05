@@ -55,7 +55,9 @@ We only require a small number of essential fields for cxon.json and make the bu
         "module_b"
     ],
 
-    "toolchain": "gnu",         // (unsupport) gnu, llvm, msvc only currently
+    "toolchain": "gnu",         // gnu, llvm, msvc only currently
+    "cc_prefix": "",            // c compiler mangle
+    "cxxc_prefix": "",          // c++ compiler mangle
     "cc": "",                   // (unsupport) custom c compiler
     "cxx": "",                  // (unsupport) custom c++ compiler
 
